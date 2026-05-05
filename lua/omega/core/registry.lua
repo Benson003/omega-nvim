@@ -273,8 +273,31 @@ local function scan_dir(dir, source)
 end
 
 
+function M.build_tool_config()
+    local conform = {}
+    local lint = {}
 
+    for _, spec in pairs(specs) do
+        local ft_list = spec.filetypes
 
+        local tools = spec.tools
+        if tools then
+            if tools.formatter and tools.formatter.preferred then
+                for _, ft in ipairs(ft_list) do
+                    conform[ft] = tools.formatter.preferred
+                end
+            end
+
+            if tools.linter and tools.linter.preferred then
+                for _, ft in ipairs(ft_list) do
+                    lint[ft] = tools.linter.preferred
+                end
+            end
+        end
+    end
+
+    return conform, lint
+end
 
 function M.init()
     local base_path = vim.fn.stdpath("config") .. "/lua"

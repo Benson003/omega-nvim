@@ -1,27 +1,32 @@
 local M = {}
-function M.attach(bufnr, tools_spec)
-    local ft = vim.bo[bufnr].filetype
 
-    if tools_spec.formatter and tools_spec.formatter.preferred then
-        local conform = require("conform")
-        -- Ensure this is a table, conform doesn't like raw strings
-        local preferred = type(tools_spec.formatter.preferred) == "string" 
-                          and { tools_spec.formatter.preferred } 
-                          or tools_spec.formatter.preferred
-        
-        conform.formatters_by_ft[ft] = preferred
+function M.attach(bufnr, tools_spec)
+    local group = vim.api.nvim_create_augroup("OmegaAutoTools", { clear = false })
+
+    -- FORMAT ON SAVE
+    if tools_spec.formatter and tools_spec.formatter.format_on_save then
+        vim.api.nvim_create_autocmd("BufWritePre", {
+            group = group,
+            buffer = bufnr,
+            callback = function()
+                require("conform").format({
+                    bufnr = bufnr,
+                    lsp_fallback = true,
+                })
+            end,
+        })
     end
 
-    if tools_spec.linter and tools_spec.linter.preferred then
-        local lint = require("lint")
-        lint.linters_by_ft[ft] = tools_spec.linter.preferred
-        
-        -- Use defer_fn to ensure the UI/Buffer is ready
-        vim.defer_fn(function()
-            if vim.api.nvim_buf_is_valid(bufnr) then
-                lint.try_lint()
-            end
-        end, 100)
+    -- LINT TRIGGER
+    if tools_spec.linter then
+        vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+            group = group,
+            buffer = bufnr,
+            callback = function()
+                require("lint").try_lint()
+            end,
+        })
     end
 end
+
 return M
