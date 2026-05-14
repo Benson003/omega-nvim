@@ -103,7 +103,7 @@ local function apply_autocmds()
 
         vim.api.nvim_create_autocmd(spec.event, {
             group = group,
-            pattern = (spec.opts and spec.opts.pattern) or "*",
+            pattern = spec.opts and spec.opts.pattern,
             callback = spec.opts and spec.opts.callback,
             desc = spec.opts and spec.opts.desc,
         })
