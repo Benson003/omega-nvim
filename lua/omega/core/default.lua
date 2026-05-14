@@ -89,7 +89,7 @@ local function default_commands()
 		print("Omega diagnostics reset")
 	end, {})
 
-	cmd("OmegaShowDiagnostics", function()
+	cmd("OmegaDiag", function()
 		diag.open_diagnostics_window()
 	end, {})
 

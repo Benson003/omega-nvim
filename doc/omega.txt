@@ -74,14 +74,14 @@ Omega merges plugin specifications from three sources. If a plugin (by name)
 exists in multiple folders, the higher priority layer wins.
 
 1.  USER UI (`user/ui/`)
-    Highest Priority. Designed for statuslines, pickers, and themes.
+    Default Priority. Designed for statuslines, pickers, and themes.
     Overrides everything else.
 
 2.  USER EXTRAS (`user/extras/`)
-    Normal Priority. For general workflow plugins.
+    Lowest Priority. For general workflow plugins.
 
 3.  INFRA (`omega/infra/plugins/`)
-    Default Priority. Provides the baseline engine functionality.
+    Highest Priority. Provides the baseline engine functionality.
 
 Note: Since UI overrides Extras, your interface remains stable even if an
 imported "extra" tries to provide a conflicting UI configuration.
