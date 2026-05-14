@@ -151,4 +151,22 @@ function M.init()
     end)
 end
 
+function M.get_lazy_specs()
+    local base   = vim.fn.stdpath("config") .. "/lua"
+
+    local infra  = scan_dir(base .. "/omega/infra/plugins", "infra")
+    local extra  = scan_dir(base .. "/user/extras", "extra")
+    local ui     = scan_dir(base .. "/user/ui", "ui")
+
+    -- 1. Get the merged list
+    local merged = startup_merge(infra, ui, extra)
+
+    -- 2. Schedule the audit for later (non-blocking)
+    vim.schedule(function()
+        audit_merge(infra, ui, extra)
+    end)
+
+    return merged
+end
+
 return M

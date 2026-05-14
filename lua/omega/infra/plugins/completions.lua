@@ -2,7 +2,6 @@ return {
     'saghen/blink.cmp',
     version = 'v0.*',
     dependencies = 'rafamadriz/friendly-snippets',
-    -- We load early to ensure the runtime path is established
     lazy = false,
     priority = 1000,
 

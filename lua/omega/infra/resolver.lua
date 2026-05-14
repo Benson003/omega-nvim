@@ -32,10 +32,10 @@ function M.resolve(bufnr)
         end
 
         require("omega.infra.handlers.completion").attach(bufnr)
-
-        -- merge tools (LAST WINS)
         if spec.tools then
-            merged_tools = spec.tools
+            merged_tools = merged_tools or {}
+            merged_tools.formatter = spec.tools.formatter or merged_tools.formatter
+            merged_tools.linter = spec.tools.linter or merged_tools.linter
         end
     end
 

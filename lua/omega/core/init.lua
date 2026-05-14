@@ -4,7 +4,7 @@ local state = require("omega.core.state")
 function M.init()
     require("omega.core.registry").init()
 
-    require("omega.core.loader").init()
+    --require("omega.core.loader").init()
 
     require("omega.core.shim").install()
 

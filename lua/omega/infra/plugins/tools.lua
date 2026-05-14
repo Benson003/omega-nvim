@@ -1,6 +1,7 @@
 return {
     {
         "stevearc/conform.nvim",
+        lazy = false,
         opts = function()
             local conform_map, _ = require("omega.core.registry").build_tool_config()
 
