@@ -13,15 +13,19 @@ function M.setup()
     require("omega.core.default").init()
     state.enable_instrumentation()
 
-    -- 3. THE PROTECTOR: Schedule the "Plugin-Heavy" logic
-    -- This waits for Lazy.nvim to finish setting up the Runtime Path (rtp)
-    -- effectively fixing the 'rtp (a nil value)' crash.
+    -- PHASE 3: The "Wait for Lazy" Wrapper (CRITICAL)
+    -- This pushes the loading of infra/overrides to the next tick.
+    -- This gives Lazy time to set the paths for snacks, blink, etc.
     vim.schedule(function()
-        -- Load infra (LSP, Handlers) and user overrides
-        require("omega.infra").init()
-        require("omega.core.overrides").load()
+        -- Now it's safe to load things that depend on other plugins
+        local ok_infra, err_infra = pcall(require, "omega.infra")
+        if ok_infra then
+            require("omega.infra").init()
+        else
+            print("Omega Infra Error: " .. err_infra)
+        end
 
-        -- Finalize: Flush the gathered state to Neovim
+        require("omega.core.overrides").load()
         require("omega.core.editor").apply()
     end)
 
