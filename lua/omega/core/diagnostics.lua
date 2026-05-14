@@ -91,71 +91,86 @@ end
 function M.reset()
 	store = default_store()
 end
-
 function M.open_diagnostics_window()
-	local lines = { " Diagnostic Report", string.rep("=", 20), "" }
+	local lines = {
+		" 󱓞 Omega Diagnostic Report",
+		" " .. string.rep("━", 40),
+		"",
+	}
 	local has_data = false
+
+	-- Helper to indent and split multi-line strings
+	local function add_wrapped(str, indent)
+		local parts = vim.split(str, "\n")
+		for _, p in ipairs(parts) do
+			table.insert(lines, string.rep(" ", indent) .. p)
+		end
+	end
 
 	for section_name, kinds in pairs(store) do
 		local section_added = false
 		for kind_name, entries in pairs(kinds) do
 			if #entries > 0 then
 				if not section_added then
-					table.insert(lines, "[" .. section_name:upper() .. "]")
+					table.insert(lines, string.format(" [%s]", section_name:upper()))
 					section_added = true
 					has_data = true
 				end
+
 				for _, entry in ipairs(entries) do
-					-- 1. Get the message or inspect the data table
-					local raw_msg = entry.data.message or vim.inspect(entry.data)
+					table.insert(lines, string.format("  󰅙 %s", kind_name:upper()))
 
-					-- 2. Split by newlines so nvim_buf_set_lines doesn't crash
-					local entry_lines = vim.split(raw_msg, "\n")
-
-					-- 3. Insert the first line with the bullet point
-					table.insert(lines, string.format("  • [%s]: %s", kind_name, entry_lines[1]))
-
-					-- 4. Insert subsequent lines (indented for readability)
-					for i = 2, #entry_lines do
-						table.insert(lines, "         " .. entry_lines[i])
+					local d = entry.data
+					-- CUSTOM FORMATTERS based on your specific keys
+					if d.path and d.error then
+						-- Format for Loader Path Errors
+						table.insert(lines, "    󰈔 Path  : " .. d.path)
+						table.insert(lines, "    󰅚 Error : " .. d.error)
+					elseif d.name and d.from and d.to then
+						-- Format for Loader Overrides
+						table.insert(lines, "    󰏖 Plugin: " .. d.name)
+						table.insert(lines, "    󰃠 Status: " .. d.from .. " ━󰁔 " .. d.to)
+					elseif d.spec and d.error then
+						-- Format for Registry Conflicts
+						table.insert(lines, "    󰗀 Spec  : " .. d.spec)
+						add_wrapped("    󰅚 Issue : " .. d.error, 0)
+					else
+						-- Fallback for unknown shapes
+						add_wrapped(vim.inspect(d), 4)
 					end
+					table.insert(lines, "") -- Small gap between entries
 				end
 			end
 		end
 		if section_added then
-			table.insert(lines, "")
+			table.insert(lines, " " .. string.rep("─", 40))
 		end
 	end
 
 	if not has_data then
-		table.insert(lines, "  No issues detected.")
+		table.insert(lines, "  󰄬 No issues detected. Engine is healthy.")
 	end
 
 	local bufnr = vim.api.nvim_create_buf(false, true)
-
-	-- This will now succeed because every item in 'lines' is a single-line string
 	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
-	-- ... rest of your window/options code ...
+	-- Buffer styling
 	vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
-	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = bufnr })
+	vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr }) -- Use markdown for bold/icons
 	vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
-	vim.api.nvim_set_option_value("filetype", "lua", { buf = bufnr }) -- Changed to lua for better table syntax highlighting
 
 	local width = math.floor(vim.o.columns * 0.7)
 	local height = math.floor(vim.o.lines * 0.6)
-	local row = math.floor((vim.o.lines - height) / 2)
-	local col = math.floor((vim.o.columns - width) / 2)
 
 	vim.api.nvim_open_win(bufnr, true, {
 		relative = "editor",
 		width = width,
 		height = height,
-		row = row,
-		col = col,
+		row = math.floor((vim.o.lines - height) / 2),
+		col = math.floor((vim.o.columns - width) / 2),
 		style = "minimal",
 		border = "rounded",
-		title = " Diagnostics ",
+		title = " 󰒓 Omega System Status ",
 		title_pos = "center",
 	})
 end
