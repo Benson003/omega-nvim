@@ -1,2 +1,2 @@
-require("omega.core").init()
+require("omega.core.init").init()
 return {}
