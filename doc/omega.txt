@@ -1,0 +1,102 @@
+*omega.txt* For Neovim version 0.10+
+                                 OMEGA ENGINE
+                       The Schema-Driven Configuration
+
+==============================================================================
+CONTENTS                                                      *omega-contents*
+
+    1. Introduction ................................ |omega-intro|
+    2. Directory Structure ......................... |omega-dirs|
+    3. The Language Registry ....................... |omega-registry|
+    4. Plugin Layers & Priority .................... |omega-layers|
+    5. Diagnostics ................................. |omega-diag|
+
+==============================================================================
+1. INTRODUCTION                                                  *omega-intro*
+
+Omega is a modular Neovim engine that separates infrastructure from user 
+configuration. It uses a strict schema for languages and a prioritized 
+loading system for plugins.
+
+==============================================================================
+2. DIRECTORY STRUCTURE                                           *omega-dirs*
+
+Omega looks for user configuration in standard paths within your Neovim
+config directory (usually `~/.config/nvim/lua/user/`):
+
+`user/langs/`     Language specifications (Canonical Format)
+`user/ui/`        UI-related plugin specs (Highest Priority)
+`user/extras/`    General plugin specs (Normal Priority)
+
+==============================================================================
+3. THE LANGUAGE REGISTRY                                     *omega-registry*
+
+Files in `user/langs/` must return a Lua table. This "Canonical Format"
+allows Omega to automate LSP, Treesitter, and Mason setup.
+
+CANONICAL FORMAT:
+>
+    {
+        [1] = string,                 -- Unique name (e.g. "go")
+        filetypes = { string },       -- List of filetypes
+    
+        treesitter = {
+            host = string,            -- Main parser
+            injections = { string },  -- (Optional) Extra parsers
+        },
+    
+        lsp = {
+            servers = {
+                [server_name] = {     -- e.g. "gopls"
+                    settings = table,
+                    on_attach = function,
+                }
+            }
+        },
+    
+        tools = {
+            mason = {
+                ensure_installed = { string }
+            },
+            formatter = {
+                preferred = { string },
+            },
+            linter = {
+                preferred = { string },
+            }
+        }
+    }
+<
+==============================================================================
+4. PLUGIN LAYERS & PRIORITY                                    *omega-layers*
+
+Omega merges plugin specifications from three sources. If a plugin (by name)
+exists in multiple folders, the higher priority layer wins.
+
+1.  USER UI (`user/ui/`)
+    Highest Priority. Designed for statuslines, pickers, and themes.
+    Overrides everything else.
+
+2.  USER EXTRAS (`user/extras/`)
+    Normal Priority. For general workflow plugins.
+
+3.  INFRA (`omega/infra/plugins/`)
+    Default Priority. Provides the baseline engine functionality.
+
+Note: Since UI overrides Extras, your interface remains stable even if an
+imported "extra" tries to provide a conflicting UI configuration.
+
+==============================================================================
+5. DIAGNOSTICS                                                   *omega-diag*
+
+Omega tracks every merge, override, and schema error.
+
+Command: `:OmegaDiag` (or your mapped key)
+
+This opens a floating window showing:
+- LOADER ERRORS: Missing paths or syntax errors in specs.
+- REGISTRY CONFLICTS: Schema mismatches or duplicate language names.
+- OVERRIDES: Log of which plugin spec won the priority merge.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
