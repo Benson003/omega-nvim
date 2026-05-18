@@ -24,7 +24,7 @@ local function init_background_tasks()
 		local has_parser = #vim.api.nvim_get_runtime_file("parser/" .. p .. ".*", false) > 0
 		if not has_parser then
 			if ok_ts then
-				ts_manager.install(p)
+				ts_manager.install_new(p, true)
 			else
 				vim.notify(
 					string.format("[Omega] Framework Error: tree-sitter-manager missing. Cannot install %s", p),
