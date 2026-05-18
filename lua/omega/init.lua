@@ -18,7 +18,7 @@ local function init_background_tasks()
 	end
 
 	local parsers = reg.get_all_treesitter_parsers()
-	local ok_ts, ts_manager = pcall(require, "tree-sitter-manager")
+	local ok_ts, ts_manager = pcall(require, "tree-sitter-manager.installer")
 
 	for _, p in ipairs(parsers) do
 		local has_parser = #vim.api.nvim_get_runtime_file("parser/" .. p .. ".*", false) > 0
