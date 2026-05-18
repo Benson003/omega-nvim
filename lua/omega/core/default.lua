@@ -97,7 +97,8 @@ local function default_commands()
 	cmd("OmegaUpdate", function()
 		print("🚀 Omega Update Sequence Initiated...")
 		require("lazy").sync({ wait = false })
-		vim.cmd("TSUpdate")
+
+		require("nvim-treesitter.install").update()
 		if vim.fn.exists(":MasonUpdate") > 0 then
 			vim.cmd("MasonUpdate")
 		end
